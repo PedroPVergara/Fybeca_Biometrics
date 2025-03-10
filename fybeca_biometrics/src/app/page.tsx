@@ -96,10 +96,26 @@ export default function Home() {
 
   // Agregar la nueva función handleLogoClick
   const handleLogoClick = () => {
+    // Scroll suave hacia arriba
     window.scrollTo({
       top: 0,
       behavior: "smooth",
     });
+
+    // Resetear estados
+    setShowAccept(false);
+    setAccepted(false);
+
+    // Resetear scroll del contenedor del contrato
+    const contractContainer = document.querySelector(".custom-scrollbar");
+    if (contractContainer) {
+      contractContainer.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+    }
+
+    // Opcional: Resetear cualquier otro estado o elemento que necesites
   };
 
   return (
@@ -107,7 +123,16 @@ export default function Home() {
       className={`flex flex-col min-h-screen overflow-hidden ${montserrat.className}`}
     >
       {/* Primera sección - 100vh */}
-      <section className="relative flex h-[100vh] w-full flex-col items-center overflow-hidden rounded-lg border bg-background">
+      <section
+        className="relative flex h-[100vh] w-full flex-col items-center overflow-hidden rounded-lg border bg-background"
+        style={{
+          backgroundImage: 'url("")',
+          backgroundRepeat: "repeat",
+          backgroundSize: "400px",
+          backgroundPosition: "center",
+          backgroundColor: "#fff", // Color de fondo por si la imagen no carga
+        }}
+      >
         {/* Logo centrado en la parte superior */}
         <div className="absolute top-8 w-full flex justify-center">
           <Image
