@@ -124,3 +124,50 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  .custom-scrollbar {
+    /* Firefox */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
+  
+    /* Chrome, Edge, Safari */
+    &::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+  
+    &::-webkit-scrollbar-track {
+      background: transparent;
+      border-radius: 4px;
+    }
+  
+    &::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 4px;
+      
+      &:hover {
+        background: rgba(0, 0, 0, 0.3);
+      }
+    }
+  }
+
+  /* Estilos para el scrollbar */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
+}
