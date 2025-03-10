@@ -94,6 +94,14 @@ export default function Home() {
     });
   };
 
+  // Agregar la nueva función handleLogoClick
+  const handleLogoClick = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
   return (
     <main
       className={`flex flex-col min-h-screen overflow-hidden ${montserrat.className}`}
@@ -107,7 +115,7 @@ export default function Home() {
             alt="Fybeca Logo"
             width={360}
             height={120}
-            className="h-[40px] object-contain"
+            className="h-[150px] object-contain" // Cambiado de h-[40px] a h-[120px]
             priority
           />
         </div>
@@ -162,14 +170,19 @@ export default function Home() {
         ref={secondSectionRef}
         className="relative w-full h-[100vh] bg-[#F8F8F3] flex flex-col items-center p-4 sm:p-6 md:p-8"
       >
-        {/* Logo centrado en la parte superior */}
-        <div className="w-full flex justify-center mb-8">
+        {/* Segunda sección - Logo clickeable */}
+        <div
+          className="w-full flex justify-center mb-8 cursor-pointer"
+          onClick={handleLogoClick}
+          role="button"
+          tabIndex={0}
+        >
           <Image
             src="/fybeca-logo.webp"
             alt="Fybeca Logo"
             width={360}
             height={120}
-            className="h-[40px] object-contain"
+            className="h-[120px] object-contain"
             priority
           />
         </div>
@@ -224,14 +237,19 @@ export default function Home() {
         ref={thirdSectionRef}
         className="relative w-full h-[100vh] bg-[#FFFFFF] flex flex-col items-center"
       >
-        {/* Logo centrado en la parte superior */}
-        <div className="w-full flex justify-center mt-8">
+        {/* Tercera sección - Logo clickeable */}
+        <div
+          className="w-full flex justify-center mt-8 cursor-pointer"
+          onClick={handleLogoClick}
+          role="button"
+          tabIndex={0}
+        >
           <Image
             src="/fybeca-logo.webp"
             alt="Fybeca Logo"
             width={360}
             height={120}
-            className="h-[40px] object-contain"
+            className="h-[120px] object-contain"
             priority
           />
         </div>
