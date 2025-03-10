@@ -37,24 +37,54 @@ export default function Home() {
 
   // Definir el esquema de validación con Zod
   const formSchema = z.object({
-    name: z.string()
+    name: z
+      .string()
       .min(1, "El nombre es requerido")
-      .regex(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/, "El nombre solo puede contener letras"),
-    surname: z.string()
+      .regex(
+        /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/,
+        "El nombre solo puede contener letras"
+      ),
+    surname: z
+      .string()
       .min(1, "El apellido es requerido")
-      .regex(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/, "El apellido solo puede contener letras"),
-    email: z.string()
+      .regex(
+        /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/,
+        "El apellido solo puede contener letras"
+      ),
+    email: z
+      .string()
       .email("Ingrese un email válido")
       .regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "El formato del email no es válido"),
-    age: z.string()
-      .refine((val) => !isNaN(Number(val)) && val !== "", "La edad debe ser un número")
-      .refine((val) => Number(val) >= 18 && Number(val) <= 120, "La edad debe estar entre 18 y 120 años"),
-    height: z.string()
-      .refine((val) => !isNaN(Number(val)) && val !== "", "La altura debe ser un número")
-      .refine((val) => Number(val) >= 100 && Number(val) <= 250, "La altura debe estar entre 100 y 250 cm"),
-    weight: z.string()
-      .refine((val) => !isNaN(Number(val)) && val !== "", "El peso debe ser un número")
-      .refine((val) => Number(val) >= 30 && Number(val) <= 300, "El peso debe estar entre 30 y 300 kg"),
+    age: z
+      .string()
+      .refine(
+        (val) => !isNaN(Number(val)) && val !== "",
+        "La edad debe ser un número"
+      )
+      .refine(
+        (val) => Number(val) >= 18 && Number(val) <= 120,
+        "La edad debe estar entre 18 y 120 años"
+      ),
+    height: z
+      .string()
+      .refine(
+        (val) => !isNaN(Number(val)) && val !== "",
+        "La altura debe ser un número"
+      )
+      .refine(
+        (val) => Number(val) >= 100 && Number(val) <= 250,
+        "La altura debe estar entre 100 y 250 cm"
+      ),
+    weight: z
+      .string()
+      .refine(
+        (val) => !isNaN(Number(val)) && val !== "",
+        "El peso debe ser un número"
+      )
+      .refine(
+        (val) => Number(val) >= 30 && Number(val) <= 300,
+        "El peso debe estar entre 30 y 300 kg"
+      ),
     gender: z.enum(["M", "F"], {
       required_error: "Debe seleccionar un género",
     }),
@@ -281,11 +311,10 @@ export default function Home() {
         className="relative w-full h-[100vh] bg-[#F8F8F3] flex flex-col items-center p-4 sm:p-6 md:p-8"
       >
         {/* Segunda sección - Logo clickeable */}
-        <div
+        <button
           className="w-full flex justify-center mb-8 cursor-pointer"
           onClick={handleLogoClick}
-          role="button"
-          tabIndex={0}
+          type="button"
         >
           <Image
             src="/fybeca-logo.webp"
@@ -295,7 +324,7 @@ export default function Home() {
             className="h-[120px] object-contain"
             priority
           />
-        </div>
+        </button>
 
         {/* Contenedor del contrato */}
         <div className="relative w-[95%] sm:w-[90%] md:w-[85%] lg:w-[90vh] h-[70vh] bg-white rounded-xl shadow-lg overflow-hidden">
@@ -346,27 +375,44 @@ export default function Home() {
       {/* Tercera sección */}
       <section
         ref={thirdSectionRef}
-        className="relative w-full min-h-[100vh] bg-[#FFFFFF] flex flex-col items-center py-8"
+        className="relative w-full h-[100vh] bg-[#FFFFFF] flex flex-col overflow-hidden"
+        onTouchMove={(e) => e.preventDefault()}
+        onWheel={(e) => e.preventDefault()}
       >
         {/* Logo clickeable */}
-        <div
-          className="w-full flex justify-center mb-8 cursor-pointer"
+        <button
+          className="w-full pt-6 pb-4 md:pt-8 md:pb-8 bg-white sticky top-0 z-10 focus:outline-none"
           onClick={handleLogoClick}
-          role="button"
-          tabIndex={0}
+          type="button"
         >
           <Image
             src="/fybeca-logo.webp"
             alt="Fybeca Logo"
             width={360}
             height={120}
-            className="h-[120px] object-contain"
+            className="h-[100px] md:h-[120px] object-contain hover:opacity-90 transition-opacity mx-auto cursor-pointer"
             priority
           />
-        </div>
+        </button>
 
-        <div className="w-full max-w-3xl px-4">
-          <div className="text-center mb-8">
+        <div 
+          className="w-full max-w-3xl px-4 mx-auto overflow-y-auto flex-1 md:px-8 overscroll-contain pb-8 md:pb-12"
+          onTouchMove={(e) => {
+            e.stopPropagation();
+            e.currentTarget.scrollBy({
+              top: -e.touches[0].clientY + (e.touches[0].clientY || 0),
+              behavior: 'auto'
+            });
+          }}
+          onWheel={(e) => {
+            e.stopPropagation();
+            e.currentTarget.scrollBy({
+              top: e.deltaY,
+              behavior: 'auto'
+            });
+          }}
+        >
+          <div className="text-center mb-4 md:mb-8">
             <h1 className="text-2xl font-semibold text-gray-800 mb-2">
               Bienvenido al sistema de diagnóstico inteligente
             </h1>
@@ -374,7 +420,7 @@ export default function Home() {
           </div>
 
           <MagicCard
-            className="overflow-hidden"
+            className="overflow-hidden mb-6 md:mb-8"
             gradientFrom="#FF4D00"
             gradientTo="#FFA500"
             gradientSize={300}
@@ -389,7 +435,11 @@ export default function Home() {
                     id="name"
                     type="text"
                     {...form.register("name")}
-                    className={`${form.formState.errors.name ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+                    className={`${
+                      form.formState.errors.name
+                        ? "border-red-500 focus-visible:ring-red-500"
+                        : ""
+                    }`}
                     aria-invalid={!!form.formState.errors.name}
                     placeholder="Solo letras"
                   />
@@ -407,7 +457,11 @@ export default function Home() {
                     id="surname"
                     type="text"
                     {...form.register("surname")}
-                    className={`${form.formState.errors.surname ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+                    className={`${
+                      form.formState.errors.surname
+                        ? "border-red-500 focus-visible:ring-red-500"
+                        : ""
+                    }`}
                     aria-invalid={!!form.formState.errors.surname}
                     placeholder="Solo letras"
                   />
@@ -425,7 +479,11 @@ export default function Home() {
                     id="email"
                     type="email"
                     {...form.register("email")}
-                    className={`${form.formState.errors.email ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+                    className={`${
+                      form.formState.errors.email
+                        ? "border-red-500 focus-visible:ring-red-500"
+                        : ""
+                    }`}
                     aria-invalid={!!form.formState.errors.email}
                     placeholder="ejemplo@correo.com"
                   />
@@ -443,7 +501,11 @@ export default function Home() {
                     id="age"
                     type="text"
                     {...form.register("age")}
-                    className={`${form.formState.errors.age ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+                    className={`${
+                      form.formState.errors.age
+                        ? "border-red-500 focus-visible:ring-red-500"
+                        : ""
+                    }`}
                     aria-invalid={!!form.formState.errors.age}
                     placeholder="18-120"
                   />
@@ -461,7 +523,11 @@ export default function Home() {
                     id="height"
                     type="text"
                     {...form.register("height")}
-                    className={`${form.formState.errors.height ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+                    className={`${
+                      form.formState.errors.height
+                        ? "border-red-500 focus-visible:ring-red-500"
+                        : ""
+                    }`}
                     aria-invalid={!!form.formState.errors.height}
                     placeholder="100-250"
                   />
@@ -479,7 +545,11 @@ export default function Home() {
                     id="weight"
                     type="text"
                     {...form.register("weight")}
-                    className={`${form.formState.errors.weight ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+                    className={`${
+                      form.formState.errors.weight
+                        ? "border-red-500 focus-visible:ring-red-500"
+                        : ""
+                    }`}
                     aria-invalid={!!form.formState.errors.weight}
                     placeholder="30-300"
                   />
@@ -496,11 +566,17 @@ export default function Home() {
                   <Select
                     value={form.watch("gender")}
                     onValueChange={(value) =>
-                      form.setValue("gender", value as "M" | "F", { shouldValidate: true })
+                      form.setValue("gender", value as "M" | "F", {
+                        shouldValidate: true,
+                      })
                     }
                   >
                     <SelectTrigger
-                      className={`${form.formState.errors.gender ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+                      className={`${
+                        form.formState.errors.gender
+                          ? "border-red-500 focus-visible:ring-red-500"
+                          : ""
+                      }`}
                       aria-invalid={!!form.formState.errors.gender}
                     >
                       <SelectValue placeholder="Seleccione género" />
