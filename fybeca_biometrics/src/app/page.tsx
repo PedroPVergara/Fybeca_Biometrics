@@ -5,20 +5,102 @@ import { ShimmerButton } from "@/components/magicui/shimmer-button";
 import { ContractContent } from "@/components/ContractContent";
 import { Montserrat } from "next/font/google";
 import { useRef, useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { Checkbox } from "@/components/ui/checkbox";
 import Image from "next/image";
+import { MagicCard } from "@/components/magicui/magic-card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
-  display: "swap",
+  weight: ["400", "500", "600", "700"],
 });
 
 export default function Home() {
+  const firstSectionRef = useRef<HTMLElement>(null);
   const secondSectionRef = useRef<HTMLElement>(null);
   const thirdSectionRef = useRef<HTMLElement>(null);
-  const [, setShowNav] = useState(true);
+  const [showNav, setShowNav] = useState(true);
   const [showAccept, setShowAccept] = useState(false);
   const [accepted, setAccepted] = useState(false);
+
+  // Definir el esquema de validación con Zod
+  const formSchema = z.object({
+    name: z.string()
+      .min(1, "El nombre es requerido")
+      .regex(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/, "El nombre solo puede contener letras"),
+    surname: z.string()
+      .min(1, "El apellido es requerido")
+      .regex(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/, "El apellido solo puede contener letras"),
+    email: z.string()
+      .email("Ingrese un email válido")
+      .regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "El formato del email no es válido"),
+    age: z.string()
+      .refine((val) => !isNaN(Number(val)) && val !== "", "La edad debe ser un número")
+      .refine((val) => Number(val) >= 18 && Number(val) <= 120, "La edad debe estar entre 18 y 120 años"),
+    height: z.string()
+      .refine((val) => !isNaN(Number(val)) && val !== "", "La altura debe ser un número")
+      .refine((val) => Number(val) >= 100 && Number(val) <= 250, "La altura debe estar entre 100 y 250 cm"),
+    weight: z.string()
+      .refine((val) => !isNaN(Number(val)) && val !== "", "El peso debe ser un número")
+      .refine((val) => Number(val) >= 30 && Number(val) <= 300, "El peso debe estar entre 30 y 300 kg"),
+    gender: z.enum(["M", "F"], {
+      required_error: "Debe seleccionar un género",
+    }),
+    diabetes: z.string().regex(/^[0-2]$/, "Valor inválido para diabetes"),
+    smoke: z.boolean(),
+    bloodPressure: z.boolean(),
+  });
+
+  // Tipo inferido del esquema
+  type FormValues = z.infer<typeof formSchema>;
+
+  // Configurar React Hook Form con el esquema de validación
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: "",
+      surname: "",
+      email: "",
+      age: "",
+      height: "",
+      weight: "",
+      gender: undefined,
+      diabetes: "0",
+      smoke: false,
+      bloodPressure: false,
+    },
+    mode: "onChange",
+  });
+
+  // Función para manejar el envío del formulario
+  const onSubmit = async (data: FormValues) => {
+    try {
+      // Convertir los valores numéricos antes de enviar
+      const formattedData = {
+        ...data,
+        age: Number(data.age),
+        height: Number(data.height),
+        weight: Number(data.weight),
+        diabetes: Number(data.diabetes),
+      };
+      console.log("Datos del formulario:", formattedData);
+      // Aquí iría la lógica para enviar los datos al servidor
+    } catch (error) {
+      console.error("Error al enviar el formulario:", error);
+    }
+  };
 
   // Prevenir scroll manual
   useEffect(() => {
@@ -96,15 +178,14 @@ export default function Home() {
 
   // Agregar la nueva función handleLogoClick
   const handleLogoClick = () => {
-    // Scroll suave hacia arriba
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-
     // Resetear estados
-    setShowAccept(false);
     setAccepted(false);
+    setShowAccept(false);
+
+    // Resetear el formulario si estamos en la sección 3
+    if (thirdSectionRef.current) {
+      form.reset();
+    }
 
     // Resetear scroll del contenedor del contrato
     const contractContainer = document.querySelector(".custom-scrollbar");
@@ -115,7 +196,11 @@ export default function Home() {
       });
     }
 
-    // Opcional: Resetear cualquier otro estado o elemento que necesites
+    // Scroll suave hacia la primera sección
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
   };
 
   return (
@@ -222,49 +307,50 @@ export default function Home() {
           >
             <div className="space-y-6">
               <ContractContent />
-              {showAccept && (
-                <div className="flex flex-col items-center gap-4 pt-6">
-                  <div className="flex items-center gap-2">
-                    <Checkbox
-                      id="terms"
-                      checked={accepted}
-                      onCheckedChange={(checked: boolean) =>
-                        setAccepted(checked)
-                      }
-                    />
-                    <label
-                      htmlFor="terms"
-                      className="text-sm text-gray-600 cursor-pointer"
-                    >
-                      Acepto los términos y condiciones
-                    </label>
-                  </div>
-
-                  {accepted && (
-                    <ShimmerButton
-                      className="w-full md:w-auto px-8 py-4 text-base md:text-lg font-medium"
-                      shimmerColor="#ffffff"
-                      background="rgba(0, 0, 0, 0.8)"
-                      onClick={handleContinue}
-                    >
-                      Continuar
-                    </ShimmerButton>
-                  )}
-                </div>
-              )}
             </div>
           </div>
         </div>
+
+        {/* Términos y condiciones y botón de continuar */}
+        {showAccept && (
+          <div className="mt-6 flex flex-col items-center gap-4">
+            <div className="flex items-center gap-3">
+              <Checkbox
+                id="terms"
+                checked={accepted}
+                onCheckedChange={(checked: boolean) => setAccepted(checked)}
+                className="h-5 w-5 border-2 border-gray-400 data-[state=unchecked]:bg-white data-[state=unchecked]:border-gray-400 data-[state=checked]:bg-[#FF4D00] data-[state=checked]:border-[#FF4D00] hover:border-[#FF4D00] hover:bg-orange-50 transition-colors"
+              />
+              <label
+                htmlFor="terms"
+                className="text-base font-semibold text-gray-800 cursor-pointer hover:text-[#FF4D00] transition-colors select-none"
+              >
+                Acepto los términos y condiciones
+              </label>
+            </div>
+
+            {accepted && (
+              <ShimmerButton
+                className="w-full md:w-auto px-8 py-4 text-base md:text-lg font-medium"
+                shimmerColor="#ffffff"
+                background="rgba(0, 0, 0, 0.8)"
+                onClick={handleContinue}
+              >
+                Continuar
+              </ShimmerButton>
+            )}
+          </div>
+        )}
       </section>
 
       {/* Tercera sección */}
       <section
         ref={thirdSectionRef}
-        className="relative w-full h-[100vh] bg-[#FFFFFF] flex flex-col items-center"
+        className="relative w-full min-h-[100vh] bg-[#FFFFFF] flex flex-col items-center py-8"
       >
-        {/* Tercera sección - Logo clickeable */}
+        {/* Logo clickeable */}
         <div
-          className="w-full flex justify-center mt-8 cursor-pointer"
+          className="w-full flex justify-center mb-8 cursor-pointer"
           onClick={handleLogoClick}
           role="button"
           tabIndex={0}
@@ -277,6 +363,242 @@ export default function Home() {
             className="h-[120px] object-contain"
             priority
           />
+        </div>
+
+        <div className="w-full max-w-3xl px-4">
+          <div className="text-center mb-8">
+            <h1 className="text-2xl font-semibold text-gray-800 mb-2">
+              Bienvenido al sistema de diagnóstico inteligente
+            </h1>
+            <p className="text-gray-600">Complete sus datos y comencemos</p>
+          </div>
+
+          <MagicCard
+            className="overflow-hidden"
+            gradientFrom="#FF4D00"
+            gradientTo="#FFA500"
+            gradientSize={300}
+          >
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="name" className="flex items-center gap-1">
+                    Nombre <span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    id="name"
+                    type="text"
+                    {...form.register("name")}
+                    className={`${form.formState.errors.name ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+                    aria-invalid={!!form.formState.errors.name}
+                    placeholder="Solo letras"
+                  />
+                  {form.formState.errors.name && (
+                    <p className="text-sm text-red-500">
+                      {form.formState.errors.name.message}
+                    </p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="surname" className="flex items-center gap-1">
+                    Apellido <span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    id="surname"
+                    type="text"
+                    {...form.register("surname")}
+                    className={`${form.formState.errors.surname ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+                    aria-invalid={!!form.formState.errors.surname}
+                    placeholder="Solo letras"
+                  />
+                  {form.formState.errors.surname && (
+                    <p className="text-sm text-red-500">
+                      {form.formState.errors.surname.message}
+                    </p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="flex items-center gap-1">
+                    Email <span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    {...form.register("email")}
+                    className={`${form.formState.errors.email ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+                    aria-invalid={!!form.formState.errors.email}
+                    placeholder="ejemplo@correo.com"
+                  />
+                  {form.formState.errors.email && (
+                    <p className="text-sm text-red-500">
+                      {form.formState.errors.email.message}
+                    </p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="age" className="flex items-center gap-1">
+                    Edad <span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    id="age"
+                    type="text"
+                    {...form.register("age")}
+                    className={`${form.formState.errors.age ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+                    aria-invalid={!!form.formState.errors.age}
+                    placeholder="18-120"
+                  />
+                  {form.formState.errors.age && (
+                    <p className="text-sm text-red-500">
+                      {form.formState.errors.age.message}
+                    </p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="height" className="flex items-center gap-1">
+                    Altura (cm) <span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    id="height"
+                    type="text"
+                    {...form.register("height")}
+                    className={`${form.formState.errors.height ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+                    aria-invalid={!!form.formState.errors.height}
+                    placeholder="100-250"
+                  />
+                  {form.formState.errors.height && (
+                    <p className="text-sm text-red-500">
+                      {form.formState.errors.height.message}
+                    </p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="weight" className="flex items-center gap-1">
+                    Peso (kg) <span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    id="weight"
+                    type="text"
+                    {...form.register("weight")}
+                    className={`${form.formState.errors.weight ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+                    aria-invalid={!!form.formState.errors.weight}
+                    placeholder="30-300"
+                  />
+                  {form.formState.errors.weight && (
+                    <p className="text-sm text-red-500">
+                      {form.formState.errors.weight.message}
+                    </p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-1">
+                    Género <span className="text-red-500">*</span>
+                  </Label>
+                  <Select
+                    value={form.watch("gender")}
+                    onValueChange={(value) =>
+                      form.setValue("gender", value as "M" | "F", { shouldValidate: true })
+                    }
+                  >
+                    <SelectTrigger
+                      className={`${form.formState.errors.gender ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+                      aria-invalid={!!form.formState.errors.gender}
+                    >
+                      <SelectValue placeholder="Seleccione género" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="M">Masculino</SelectItem>
+                      <SelectItem value="F">Femenino</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {form.formState.errors.gender && (
+                    <p className="text-sm text-red-500">
+                      {form.formState.errors.gender.message}
+                    </p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label>Diabetes</Label>
+                  <Select
+                    value={form.watch("diabetes")}
+                    onValueChange={(value) =>
+                      form.setValue("diabetes", value, { shouldValidate: true })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccione tipo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="0">No</SelectItem>
+                      <SelectItem value="1">Tipo 1</SelectItem>
+                      <SelectItem value="2">Tipo 2</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="flex items-center space-x-4">
+                  <Label>¿Fuma?</Label>
+                  <div className="flex space-x-4">
+                    <Button
+                      type="button"
+                      variant={form.watch("smoke") ? "default" : "outline"}
+                      onClick={() => form.setValue("smoke", true)}
+                      className="w-24"
+                    >
+                      Sí
+                    </Button>
+                    <Button
+                      type="button"
+                      variant={!form.watch("smoke") ? "default" : "outline"}
+                      onClick={() => form.setValue("smoke", false)}
+                      className="w-24"
+                    >
+                      No
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-4">
+                  <Label>¿Toma medicación para la presión arterial?</Label>
+                  <div className="flex space-x-4">
+                    <Button
+                      type="button"
+                      variant={
+                        form.watch("bloodPressure") ? "default" : "outline"
+                      }
+                      onClick={() => form.setValue("bloodPressure", true)}
+                      className="w-24"
+                    >
+                      Sí
+                    </Button>
+                    <Button
+                      type="button"
+                      variant={
+                        !form.watch("bloodPressure") ? "default" : "outline"
+                      }
+                      onClick={() => form.setValue("bloodPressure", false)}
+                      className="w-24"
+                    >
+                      No
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end pt-6">
+                <Button
+                  type="submit"
+                  className="w-full md:w-auto"
+                  disabled={
+                    !form.formState.isValid || form.formState.isSubmitting
+                  }
+                >
+                  Continuar
+                </Button>
+              </div>
+            </form>
+          </MagicCard>
         </div>
       </section>
 
